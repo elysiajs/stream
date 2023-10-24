@@ -29,7 +29,7 @@ const app = new Elysia()
             )
         }
     )
-    .get('/chat', (chat) => (
+    .get('/', (chat) => (
         <html>
             <head>
                 <title>ChatGPT</title>
