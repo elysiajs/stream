@@ -2,13 +2,29 @@ import { Elysia, t } from 'elysia'
 
 import { html } from '@elysiajs/html'
 import { staticPlugin } from '@elysiajs/static'
+import { cors } from '@elysiajs/cors'
 
 import { OpenAI } from 'openai'
 import { Stream } from '../src'
 
 import { instruction } from './instruction'
 
+const openai = new OpenAI({ apiKey: Bun.env.OPENAI_API_KEY })
+
+// Server Sent Event
+new Stream((stream) => {
+    const interval = setInterval(() => {
+        stream.send('hello world')
+    }, 500)
+
+    setTimeout(() => {
+        clearInterval(interval)
+        stream.close()
+    }, 3000)
+})
+
 const app = new Elysia()
+    .use(cors())
     .use(html())
     .use(staticPlugin())
     .decorate('openai', new OpenAI({ apiKey: Bun.env.OPENAI_API_KEY }))
@@ -29,7 +45,10 @@ const app = new Elysia()
                     model: 'gpt-3.5-turbo',
                     stream: true,
                     messages: instruction.concat(body as any)
-                })
+                }),
+                {
+                    retry: 1000
+                }
             ),
         {
             body: 'openai.prompt'
@@ -46,7 +65,10 @@ const app = new Elysia()
                         'content-type': 'application/json'
                     },
                     body: JSON.stringify(body)
-                })
+                }),
+                {
+                    event: 'ai'
+                }
             ),
         {
             body: 'openai.prompt'

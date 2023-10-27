@@ -8,6 +8,9 @@ new Elysia()
         '/source',
         () =>
             new Stream((stream) => {
+                stream.event = 'hi'
+                stream.retry = 1000
+
                 const interval = setInterval(() => {
                     stream.send('hello world')
                 }, 500)
@@ -35,3 +38,4 @@ new Elysia()
             </body>
         </html>
     ))
+    .listen(3000)

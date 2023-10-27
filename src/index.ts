@@ -2,9 +2,6 @@ import { nanoid } from 'nanoid'
 
 type MaybePromise<T> = T | Promise<T>
 
-export const wait = (ms: number) =>
-    new Promise<void>((resolve) => setTimeout(resolve, ms))
-
 type Streamable =
     | Iterable<unknown>
     | AsyncIterable<unknown>
@@ -12,11 +9,37 @@ type Streamable =
     | Response
     | null
 
+interface StreamOption {
+    /**
+     * A string identifying the type of event described.
+     * If specified, an event will be dispatched on the browser
+     * to the listener for the specified event name;
+     *
+     * The website source code should use addEventListener()
+     * to listen for named events.
+     *
+     * The onmessage handler is called if no event name
+     * is specified for a message.
+     */
+    event?: string
+    /**
+     * The reconnection time in milliseconds.
+     *
+     * If the connection to the server is lost,
+     * the browser will wait for the specified time before
+     * attempting to reconnect.
+     */
+    retry?: number
+}
+
 const encoder = new TextEncoder()
 
-function isIterable(
+export const wait = (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms))
+
+const isIterable = (
     value: unknown
-): value is Iterable<any> | AsyncIterable<any> {
+): value is Iterable<any> | AsyncIterable<any> => {
     if (!value) return false
 
     return (
@@ -32,9 +55,54 @@ export class Stream<Data extends string | number | boolean | object> {
     private controller: ReadableStreamController<any> | undefined
     stream: ReadableStream<Data>
 
+    private _retry?: number
+    private _event?: string
+    private label: string = ''
+    private labelUint8Array = new Uint8Array()
+
+    private composeLabel() {
+        this.label = ''
+
+        if (this._event) this.label += `event: ${this._event}\n`
+        if (this._retry) this.label += `retry: ${this._retry}\n`
+
+        if (this.label) this.labelUint8Array = encoder.encode(this.label)
+    }
+
+    get retry() {
+        return this._retry
+    }
+
+    set retry(retry: number | undefined) {
+        this._retry = retry
+        this.composeLabel()
+    }
+
+    get event() {
+        return this._event
+    }
+
+    set event(event: string | undefined) {
+        this._event = event
+        this.composeLabel()
+    }
+
+    static concatUintArray(a: Uint8Array, b: Uint8Array) {
+        const arr = new Uint8Array(a.length + b.length)
+        arr.set(a, 0)
+        arr.set(b, a.length)
+
+        return arr
+    }
+
     constructor(
-        callback?: ((stream: Stream<Data>) => void) | MaybePromise<Streamable>
+        callback?: ((stream: Stream<Data>) => void) | MaybePromise<Streamable>,
+        { retry, event }: StreamOption = {}
     ) {
+        if (retry) this._retry = retry
+        if (event) this._event = event
+        if (retry || event) this.composeLabel()
+
         switch (typeof callback) {
             case 'function':
             case 'undefined':
@@ -99,13 +167,24 @@ export class Stream<Data extends string | number | boolean | object> {
     send(data: string | number | boolean | object | Uint8Array) {
         if (!this.controller || data === '' || data === undefined) return
 
-        if (data instanceof Uint8Array) this.controller.enqueue(data)
-        else
+        if (data instanceof Uint8Array) {
+            this.controller.enqueue(
+                this.label
+                    ? Stream.concatUintArray(this.labelUint8Array, data)
+                    : data
+            )
+        } else
             this.controller.enqueue(
                 encoder.encode(
-                    typeof data === 'string' && data.startsWith('id:')
-                        ? data
-                        : `id: ${nanoid()}\ndata: ${
+                    typeof data === 'string' && data.includes('id:')
+                        ? data +
+                              (this._event && !data.includes('event:')
+                                  ? `\nevent: ${this._event}`
+                                  : '') +
+                              (this._retry && !data.includes('retry:')
+                                  ? `\retry: ${this.retry}`
+                                  : '')
+                        : `id: ${nanoid()}\n${this.label}data: ${
                               typeof data === 'object'
                                   ? JSON.stringify(data)
                                   : data
