@@ -1,80 +1,80 @@
-import { Elysia, t } from 'elysia'
+import { Elysia, t } from "elysia";
 
-import { html } from '@elysiajs/html'
-import { staticPlugin } from '@elysiajs/static'
-import { cors } from '@elysiajs/cors'
+import { html } from "@elysiajs/html";
+import { staticPlugin } from "@elysiajs/static";
+import { cors } from "@elysiajs/cors";
 
-import { OpenAI } from 'openai'
-import { Stream } from '../src'
+import { OpenAI } from "openai";
+import { Stream } from "../src";
 
-import { instruction } from './instruction'
+import { instruction } from "./instruction";
 
-const openai = new OpenAI({ apiKey: Bun.env.OPENAI_API_KEY })
+const openai = new OpenAI({ apiKey: Bun.env.OPENAI_API_KEY });
 
 // Server Sent Event
 new Stream((stream) => {
     const interval = setInterval(() => {
-        stream.send('hello world')
-    }, 500)
+        stream.send("hello world");
+    }, 500);
 
     setTimeout(() => {
-        clearInterval(interval)
-        stream.close()
-    }, 3000)
-})
+        clearInterval(interval);
+        stream.close();
+    }, 3000);
+});
 
 const app = new Elysia()
     .use(cors())
     .use(html())
     .use(staticPlugin())
-    .decorate('openai', new OpenAI({ apiKey: Bun.env.OPENAI_API_KEY }))
+    .decorate("openai", new OpenAI({ apiKey: Bun.env.OPENAI_API_KEY }))
     .model(
-        'openai.prompt',
+        "openai.prompt",
         t.Array(
             t.Object({
                 role: t.String(),
-                content: t.String()
-            })
-        )
+                content: t.String(),
+            }),
+        ),
     )
     .post(
-        '/ai',
+        "/ai",
         ({ openai, body }) =>
             new Stream(
                 openai.chat.completions.create({
-                    model: 'gpt-3.5-turbo',
+                    model: "gpt-3.5-turbo",
                     stream: true,
-                    messages: instruction.concat(body as any)
+                    messages: instruction.concat(body as any),
                 }),
                 {
-                    retry: 1000
-                }
+                    retry: 1000,
+                },
             ),
         {
-            body: 'openai.prompt'
-        }
+            body: "openai.prompt",
+        },
     )
     // ? You can stream from fetch to proxy response
     .post(
-        '/ai/proxy',
+        "/ai/proxy",
         ({ body }) =>
             new Stream(
-                fetch('http://localhost:3000/ai', {
-                    method: 'POST',
+                fetch("http://localhost:3000/ai", {
+                    method: "POST",
                     headers: {
-                        'content-type': 'application/json'
+                        "content-type": "application/json",
                     },
-                    body: JSON.stringify(body)
+                    body: JSON.stringify(body),
                 }),
                 {
-                    event: 'ai'
-                }
+                    event: "ai",
+                },
             ),
         {
-            body: 'openai.prompt'
-        }
+            body: "openai.prompt",
+        },
     )
-    .get('/', () => (
+    .get("/", () => (
         <html>
             <head>
                 <title>ArisGPT</title>
@@ -86,31 +86,31 @@ const app = new Elysia()
             </head>
             <body>
                 <template id="ai-message">
-                    <section class="flex gap-2 p-2.5 border rounded-lg">
+                    <section class="flex gap-2 rounded-lg border p-2.5">
                         <img
-                            class="w-12 h-12 min-w-12 rounded-full object-cover object-center"
+                            class="min-w-12 h-12 w-12 rounded-full object-cover object-center"
                             src="/public/aris-maid.png"
                             alt="Aris Maid"
                         />
-                        <p class="text-lg w-full mt-2.5 mb-1 px-2 whitespace-pre-wrap break-words">
+                        <p class="mb-1 mt-2.5 w-full whitespace-pre-wrap break-words px-2 text-lg">
                             ...
                         </p>
                     </section>
                 </template>
 
                 <template id="user-message">
-                    <section class="flex gap-2 p-2.5 bg-gray-100/75 rounded-lg">
+                    <section class="flex gap-2 rounded-lg bg-gray-100/75 p-2.5">
                         <img
-                            class="w-12 h-12 min-w-12 rounded-full object-cover object-center"
+                            class="min-w-12 h-12 w-12 rounded-full object-cover object-center"
                             src="/public/aris.jpg"
                             alt="Aris"
                         />
-                        <p class="text-lg w-full mt-2.5 mb-1 px-2 whitespace-pre-wrap break-words" />
+                        <p class="mb-1 mt-2.5 w-full whitespace-pre-wrap break-words px-2 text-lg" />
                     </section>
                 </template>
 
-                <main class="flex flex-col justify-center items-center gap-3 w-full max-w-xl min-h-screen mx-auto px-4">
-                    <header class="sticky top-0 flex w-full p-2 bg-white border-b">
+                <main class="mx-auto flex min-h-screen w-full max-w-xl flex-col items-center justify-center gap-3 px-4">
+                    <header class="sticky top-0 flex w-full border-b bg-white p-2">
                         <h1 class="text-2xl font-medium">
                             Aris
                             <span class="font-normal text-blue-500">GPT</span>
@@ -118,16 +118,16 @@ const app = new Elysia()
                     </header>
                     <section
                         id="chat"
-                        class="flex flex-col flex-1 w-full gap-3 py-4"
+                        class="flex w-full flex-1 flex-col gap-3 py-4"
                     />
                     <form
                         id="form"
-                        class="sticky bottom-4 flex w-full px-1 rounded-lg bg-gray-100"
+                        class="sticky bottom-4 flex w-full rounded-lg bg-gray-100 px-1"
                     >
                         <input
                             id="messager"
                             placeholder="Send a message"
-                            class="text-lg w-full p-2.5 bg-transparent outline-none"
+                            class="w-full bg-transparent p-2.5 text-lg outline-none"
                         />
                     </form>
                 </main>
@@ -213,13 +213,13 @@ const app = new Elysia()
                                             role: 'assistant',
                                             content: message
                                         })
-        
+
                                         break
                                     }
                                 }
                             } finally {
                                 processing = false
-                                messager.removeAttribute("disabled")                                
+                                messager.removeAttribute("disabled")
                                 messager.focus()
                             }
                         })
@@ -227,4 +227,4 @@ const app = new Elysia()
             </body>
         </html>
     ))
-    .listen(3000)
+    .listen(3000);

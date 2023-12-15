@@ -12,6 +12,7 @@ type Streamable =
 interface StreamOption {
     /**
      * A string identifying the type of event described.
+     * 
      * If specified, an event will be dispatched on the browser
      * to the listener for the specified event name;
      *
