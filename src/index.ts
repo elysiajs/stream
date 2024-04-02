@@ -9,7 +9,7 @@ type Streamable =
     | Response
     | null
 
-interface StreamOption {
+type StreamOption = {
     /**
      * A string identifying the type of event described.
      * 
@@ -31,6 +31,25 @@ interface StreamOption {
      * attempting to reconnect.
      */
     retry?: number
+    /**
+     * The format of the data sent throw the stream.
+     * 
+     * If set to true, the data will be directly sent without
+     * any transformation.
+     * 
+     * By default all the data are sent with an id.
+     */
+    rowData?: false
+} | {
+    /**
+     * The format of the data sent throw the stream.
+     * 
+     * If set to true, the data will be directly sent without
+     * any transformation.
+     * 
+     * By default all the data are sent with an id.
+     */
+    rowData: true
 }
 
 const encoder = new TextEncoder()
@@ -58,6 +77,7 @@ export class Stream<Data extends string | number | boolean | object> {
 
     private _retry?: number
     private _event?: string
+    private _rowData?: boolean
     private label: string = ''
     private labelUint8Array = new Uint8Array()
 
@@ -98,11 +118,16 @@ export class Stream<Data extends string | number | boolean | object> {
 
     constructor(
         callback?: ((stream: Stream<Data>) => void) | MaybePromise<Streamable>,
-        { retry, event }: StreamOption = {}
+        streamOption: StreamOption = {}
     ) {
-        if (retry) this._retry = retry
-        if (event) this._event = event
-        if (retry || event) this.composeLabel()
+        if (!streamOption.rowData && streamOption.retry) 
+            this._retry = streamOption.retry
+        if (!streamOption.rowData && streamOption.event) 
+            this._event = streamOption.event
+        if (streamOption.rowData) 
+            this._rowData = streamOption.rowData
+        if (!streamOption.rowData && (streamOption.retry || streamOption.event)) 
+            this.composeLabel()
 
         switch (typeof callback) {
             case 'function':
@@ -173,6 +198,10 @@ export class Stream<Data extends string | number | boolean | object> {
                 this.label
                     ? Stream.concatUintArray(this.labelUint8Array, data)
                     : data
+            )
+        } else if (this._rowData) {
+            this.controller.enqueue(
+                encoder.encode(typeof data === 'object' ? JSON.stringify(data) : data.toString())
             )
         } else
             this.controller.enqueue(
