@@ -32,7 +32,7 @@ type StreamOption = {
      */
     retry?: number
     /**
-     * The format of the data sent throw the stream.
+     * The format of the data sent through the stream.
      * 
      * If set to true, the data will be directly sent without
      * any transformation.
@@ -42,7 +42,7 @@ type StreamOption = {
     rowData?: false
 } | {
     /**
-     * The format of the data sent throw the stream.
+     * The format of the data sent through the stream.
      * 
      * If set to true, the data will be directly sent without
      * any transformation.
