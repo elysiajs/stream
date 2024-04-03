@@ -39,7 +39,7 @@ type StreamOption = {
      * 
      * By default all the data are sent with an id.
      */
-    rowData?: false
+    rawData?: false
 } | {
     /**
      * The format of the data sent through the stream.
@@ -49,7 +49,7 @@ type StreamOption = {
      * 
      * By default all the data are sent with an id.
      */
-    rowData: true
+    rawData: true
 }
 
 const encoder = new TextEncoder()
@@ -77,7 +77,7 @@ export class Stream<Data extends string | number | boolean | object> {
 
     private _retry?: number
     private _event?: string
-    private _rowData?: boolean
+    private _rawData?: boolean
     private label: string = ''
     private labelUint8Array = new Uint8Array()
 
@@ -120,13 +120,13 @@ export class Stream<Data extends string | number | boolean | object> {
         callback?: ((stream: Stream<Data>) => void) | MaybePromise<Streamable>,
         streamOption: StreamOption = {}
     ) {
-        if (!streamOption.rowData && streamOption.retry) 
+        if (!streamOption.rawData && streamOption.retry) 
             this._retry = streamOption.retry
-        if (!streamOption.rowData && streamOption.event) 
+        if (!streamOption.rawData && streamOption.event) 
             this._event = streamOption.event
-        if (streamOption.rowData) 
-            this._rowData = streamOption.rowData
-        if (!streamOption.rowData && (streamOption.retry || streamOption.event)) 
+        if (streamOption.rawData) 
+            this._rawData = streamOption.rawData
+        if (!streamOption.rawData && (streamOption.retry || streamOption.event)) 
             this.composeLabel()
 
         switch (typeof callback) {
@@ -199,7 +199,7 @@ export class Stream<Data extends string | number | boolean | object> {
                     ? Stream.concatUintArray(this.labelUint8Array, data)
                     : data
             )
-        } else if (this._rowData) {
+        } else if (this._rawData) {
             this.controller.enqueue(
                 encoder.encode(typeof data === 'object' ? JSON.stringify(data) : data.toString())
             )
