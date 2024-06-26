@@ -1,6 +1,6 @@
 {
   "name": "@elysiajs/stream",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": {
     "name": "saltyAom",
     "url": "https://github.com/SaltyAom",
@@ -12,12 +12,12 @@
   },
   "main": "./dist/index.js",
   "devDependencies": {
-    "@elysiajs/cors": "^0.7.1",
-    "@elysiajs/html": "^0.7.3",
-    "@elysiajs/static": "^0.7.1",
+    "@elysiajs/cors": "^1.0.2",
+    "@elysiajs/html": "^1.0.2",
+    "@elysiajs/static": "^1.0.3",
     "@types/bun": "^1.0.4",
     "@types/node": "^20.1.4",
-    "elysia": "1.0.2",
+    "elysia": "^1.1.0-exp.8",
     "eslint": "^8.40.0",
     "openai": "^4.13.0",
     "rimraf": "4.3",

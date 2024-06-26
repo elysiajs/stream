@@ -203,6 +203,10 @@ export class Stream<Data extends string | number | boolean | object> {
     get value() {
         return this.stream
     }
+
+    toResponse() {
+	return this.value
+    }
 }
 
 export default Stream
