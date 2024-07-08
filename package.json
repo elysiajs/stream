@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/elysiajs/elysia-static"
+    "url": "https://github.com/elysiajs/elysia-stream"
   },
   "main": "./dist/index.js",
   "devDependencies": {
@@ -32,9 +32,9 @@
     "node": "./dist/index.js",
     "default": "./dist/index.js"
   },
-  "bugs": "https://github.com/elysiajs/elysia-static/issues",
-  "description": "Plugin for Elysia for serving static folder",
-  "homepage": "https://github.com/elysiajs/elysia-static",
+  "bugs": "https://github.com/elysiajs/elysia-stream/issues",
+  "description": "Plugin for Elysia for streaming response and Server Sent Event",
+  "homepage": "https://github.com/elysiajs/elysia-stream",
   "keywords": [
     "elysia",
     "stream",
