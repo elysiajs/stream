@@ -1,54 +1,52 @@
 {
-  "name": "@elysiajs/stream",
-  "version": "1.0.3",
-  "author": {
-    "name": "saltyAom",
-    "url": "https://github.com/SaltyAom",
-    "email": "saltyaom@gmail.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/elysiajs/elysia-static"
-  },
-  "main": "./dist/index.js",
-  "devDependencies": {
-    "@elysiajs/cors": "^1.0.2",
-    "@elysiajs/html": "^1.0.2",
-    "@elysiajs/static": "^1.0.3",
-    "@types/bun": "^1.0.4",
-    "@types/node": "^20.1.4",
-    "elysia": "^1.1.0-exp.8",
-    "eslint": "^8.40.0",
-    "openai": "^4.13.0",
-    "rimraf": "4.3",
-    "typescript": "^5.0.4"
-  },
-  "peerDependencies": {
-    "elysia": ">= 1.0.2"
-  },
-  "exports": {
-    "require": "./dist/cjs/index.js",
-    "import": "./dist/index.js",
-    "node": "./dist/index.js",
-    "default": "./dist/index.js"
-  },
-  "bugs": "https://github.com/elysiajs/elysia-static/issues",
-  "description": "Plugin for Elysia for serving static folder",
-  "homepage": "https://github.com/elysiajs/elysia-static",
-  "keywords": [
-    "elysia",
-    "stream",
-    "sse"
-  ],
-  "license": "MIT",
-  "scripts": {
-    "dev": "bun run --watch example/index.tsx",
-    "test": "bun test",
-    "build": "rimraf dist && tsc --project tsconfig.esm.json && tsc --project tsconfig.cjs.json",
-    "release": "npm run build && npm run test && npm publish --access public"
-  },
-  "types": "./src/index.ts",
-  "dependencies": {
-    "nanoid": "^5.0.1"
-  }
+    "name": "@elysiajs/stream",
+    "version": "1.1.0",
+    "license": "MIT",
+    "scripts": {
+        "dev": "bun run --watch example/index.tsx",
+        "test": "bun test",
+        "build": "bun build.ts",
+        "release": "npm run build && npm run test && npm publish --access public"
+    },
+    "main": "./dist/cjs/index.js",
+    "types": "./dist/index.d.ts",
+    "module": "./dist/index.mjs",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs",
+            "require": "./dist/cjs/index.js"
+        }
+    },
+    "dependencies": {
+        "nanoid": "^5.0.1"
+    },
+    "devDependencies": {
+        "@types/bun": "1.1.6",
+        "elysia": ">= 1.1.0-rc.2",
+        "eslint": "9.6.0",
+        "tsup": "^8.1.0",
+        "typescript": "^5.5.3"
+    },
+    "peerDependencies": {
+        "elysia": ">= 1.1.0"
+    },
+    "bugs": "https://github.com/elysiajs/elysia-static/issues",
+    "description": "Plugin for Elysia for serving static folder",
+    "homepage": "https://github.com/elysiajs/elysia-static",
+    "keywords": [
+        "elysia",
+        "stream",
+        "sse"
+    ],
+    "author": {
+        "name": "saltyAom",
+        "url": "https://github.com/SaltyAom",
+        "email": "saltyaom@gmail.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/elysiajs/elysia-static"
+    }
 }

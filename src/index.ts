@@ -12,7 +12,7 @@ type Streamable =
 interface StreamOption {
     /**
      * A string identifying the type of event described.
-     * 
+     *
      * If specified, an event will be dispatched on the browser
      * to the listener for the specified event name;
      *
@@ -38,19 +38,9 @@ const encoder = new TextEncoder()
 export const wait = (ms: number) =>
     new Promise<void>((resolve) => setTimeout(resolve, ms))
 
-const isIterable = (
-    value: unknown
-): value is Iterable<any> | AsyncIterable<any> => {
-    if (!value) return false
-
-    return (
-        // @ts-ignore
-        typeof value[Symbol.asyncIterator] === 'function' ||
-        // @ts-ignore
-        typeof value[Symbol.iterator] === 'function'
-    )
-}
-
+/**
+ * @deprecated Use generator function instead of using Stream class
+ */
 export class Stream<Data extends string | number | boolean | object> {
     private $passthrough = 'value'
     private controller: ReadableStreamController<any> | undefined
